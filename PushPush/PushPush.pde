@@ -199,12 +199,12 @@ void drawBackground(){
 
 void drawBasedOnStateMap(){
 	if(currentGame.needsViewUpdate){
+		clear();
+		drawBackground();
 		currentGame.drawAtBlock(0,0);
 	}
 }
 
 void draw(){
-	clear();
-	drawBackground();
 	drawBasedOnStateMap();
 }
