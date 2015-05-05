@@ -104,7 +104,6 @@ class HCPixmap {
 				fill(colorAtPoint.red, colorAtPoint.green, colorAtPoint.blue);
 				noStroke();
 				rect(x+left, y+top, 1, 1);
-				println("Draw point " + (x+top) + "," + (y+left) + " color : " + colorAtPoint.red + colorAtPoint.green + colorAtPoint.blue);
 			}
 		}
 	}
@@ -131,7 +130,21 @@ void loadPixmaps () {
 	redhouseMap = new HCPixmap("redhouse");
 }
 
+void drawBackground(){
+	for(int top = 0; top < viewSizeInBlocks; top++){
+		for(int left = 0; left < viewSizeInBlocks; left++){
+			backgroundMap.drawAtBlock(left, top);
+		}
+	}
+}
+
+void drawBasedOnStateMap(){
+
+}
+
 void draw(){
+	clear();
+	drawBackground();
 	brickMap.drawAtBlock(0,0);
 	brickMap.drawAtBlock(1,0);
 	brickMap.drawAtBlock(2,0);
