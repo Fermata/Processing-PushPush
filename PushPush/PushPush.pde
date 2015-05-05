@@ -1,5 +1,6 @@
 int blockSize = 14;
 int viewSizeInBlocks = 10;
+int viewScale = 2;
 
 class HCColor {
 	public int red;
@@ -103,7 +104,7 @@ class HCPixmap {
 				HCColor colorAtPoint = this.colors[colorIdAtPoint];
 				fill(colorAtPoint.red, colorAtPoint.green, colorAtPoint.blue);
 				noStroke();
-				rect(x+left, y+top, 1, 1);
+				rect(x * viewScale + left * viewScale, y * viewScale + top * viewScale, viewScale, viewScale);
 			}
 		}
 	}
@@ -113,11 +114,69 @@ class HCPixmap {
 	}
 }
 
+class PushPushGame {
+	public char[][] map = new char[viewSizeInBlocks][viewSizeInBlocks];
+	private static final String stageDirectory = "stage/";
+	public String name;
+	public String path;
+	public boolean needsViewUpdate = true;
+
+	final String pathForStage (String name) {
+		return stageDirectory + name + ".stage";
+	}
+
+	public PushPushGame (String name) {
+		this.name = name;
+		this.path = pathForStage(name);
+		this.parse();
+	}
+
+	private void parse() {
+		String[] content = loadStrings(this.path);
+		for(int index = 0; index < content.length; index++){
+			String line = content[index];
+			int lineLength = line.length();
+			for(int position = 0; position < lineLength; position++){
+				this.map[index][position] = line.charAt(position);
+			}
+		}
+	}
+
+	public void drawAtBlock(int x, int y) {
+		for(int top = 0; top < viewSizeInBlocks; top++){
+			for(int left = 0; left < viewSizeInBlocks; left++){
+				char itemIdAtPoint = this.map[top][left];
+				if(itemIdAtPoint == '+'){
+					continue;
+				}
+				if(itemIdAtPoint == '#'){
+					brickMap.drawAtBlock(x + left, y + top);
+					continue;
+				}
+				if(itemIdAtPoint == '^'){
+					houseMap.drawAtBlock(x + left, y + top);
+					continue;
+				}
+				if(itemIdAtPoint == '0'){
+					crystalMap.drawAtBlock(x + left, y + top);
+					continue;
+				}
+				if(itemIdAtPoint == '*'){
+					characterMap.drawAtBlock(x + left, y + top);
+					continue;
+				}
+			}
+		}
+		this.needsViewUpdate = false;
+	}
+}
 
 HCPixmap characterMap, backgroundMap, brickMap, crystalMap, houseMap, redhouseMap;
+PushPushGame currentGame;
 
 void setup () {
-	size(blockSize * viewSizeInBlocks, blockSize * viewSizeInBlocks);
+	size(blockSize * viewSizeInBlocks * viewScale, blockSize * viewSizeInBlocks * viewScale);
+	currentGame = new PushPushGame("1");
 	loadPixmaps();
 }
 
@@ -139,14 +198,13 @@ void drawBackground(){
 }
 
 void drawBasedOnStateMap(){
-
+	if(currentGame.needsViewUpdate){
+		currentGame.drawAtBlock(0,0);
+	}
 }
 
 void draw(){
 	clear();
 	drawBackground();
-	brickMap.drawAtBlock(0,0);
-	brickMap.drawAtBlock(1,0);
-	brickMap.drawAtBlock(2,0);
-	characterMap.drawAtBlock(3,0);
+	drawBasedOnStateMap();
 }
