@@ -120,11 +120,14 @@ class PushPushGame {
 	private static final String recordDirectory = "records/";
 	public String name;
 	public String path;
+	public String recordPath;
 	public int characterX;
 	public int characterY;
 	public int moveCount = 0;
+	public int bestMoves = 0;
 	public int numberOfHouse = 0;
 	public int numberOfFinishedHouse = 0;
+	public boolean isNewBest = false;
 	public boolean displayFinished = false;
 	public boolean needsViewUpdate = true;
 
@@ -140,6 +143,7 @@ class PushPushGame {
 	public PushPushGame (String name) {
 		this.name = name;
 		this.path = pathForStage(name);
+		this.recordPath = pathForRecord(name);
 		this.parse();
 	}
 
@@ -154,6 +158,21 @@ class PushPushGame {
 		}
 		this.findCharacter();
 		this.fetchHouseCount();
+		this.loadBest();
+	}
+
+	public void loadBest () {
+		String best = loadStrings(this.recordPath)[0];
+		this.bestMoves = Integer.parseInt(best);
+		println(best);
+	}
+
+	public String bestScore () {
+		if(this.bestMoves == 0){
+			return "NONE";
+		}else{
+			return "" + this.bestMoves;
+		}
 	}
 
 	public void fetchHouseCount () {
@@ -307,7 +326,6 @@ class PushPushGame {
 
 	public void finishHouse () {
 		this.numberOfFinishedHouse++;
-		this.increaseMove();
 		if(this.numberOfHouse == this.numberOfFinishedHouse){
 			this.stageCleared();
 		}
@@ -318,7 +336,18 @@ class PushPushGame {
 	}
 
 	public void stageCleared () {
+		if(this.moveCount + 1 < this.bestMoves){
+			this.bestMoves = this.moveCount + 1;
+			this.isNewBest = true;
+			this.saveBest();
+		}
 		displayFinished = true;
+	}
+
+	public void saveBest () {
+		String[] score = new String[1];
+		score[0] = "" + this.bestMoves;
+		saveStrings(this.recordPath, score);
 	}
 
 	public void moveCharacher (int input) {
@@ -436,12 +465,18 @@ void drawScore () {
 		text("FINISHED!", blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 13 * viewScale);
 		textSize(9 * viewScale);
 		text("MOVES : " + currentGame.moveCount, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 10 * viewScale);
-		text("BEST : " + 8, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
+		String message;
+		if(currentGame.isNewBest){
+			message = "NEW BEST!";
+		}else{
+			message = "BEST : " + currentGame.bestScore();
+		}
+		text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
 	}else{
 		fill(0);
 		textSize(7 * viewScale);
 		textAlign(LEFT);
-		text("MOVES:" + currentGame.moveCount + "  BEST:8", viewScale, 8 * viewScale);
+		text("MOVES:" + currentGame.moveCount + "  BEST:" + currentGame.bestScore(), viewScale, 8 * viewScale);
 		textAlign(RIGHT);
 		text("STAGE " + currentGame.name, blockSize * viewSizeInBlocks * viewScale - viewScale, 8 * viewScale);
 	}
