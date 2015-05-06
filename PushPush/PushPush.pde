@@ -334,7 +334,15 @@ class PushPushGame {
 	}
 
 	public void finishHouse () {
-		this.numberOfFinishedHouse++;
+		this.numberOfFinishedHouse = 0;
+		for(int top = 0; top < viewSizeInBlocks; top++){
+			for(int left = 0; left < viewSizeInBlocks; left++){
+				char itemIdAtPoint = this.map[top][left];
+				if(itemIdAtPoint == '@'){
+					this.numberOfFinishedHouse++;
+				}
+			}
+		}
 		if(this.numberOfHouse == this.numberOfFinishedHouse){
 			this.stageCleared();
 		}
@@ -370,7 +378,12 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				this.map[this.characterY - 1][this.characterX] = '*';
+				//this.map[this.characterY - 1][this.characterX] = '*';
+				if(this.map[this.characterY - 1][this.characterX] == '@'){
+					this.map[this.characterY - 1][this.characterX] = '$';
+				}else{
+					this.map[this.characterY - 1][this.characterX] = '*';
+				}
 				if(this.map[this.characterY][this.characterX] == '$'){
 					this.map[this.characterY][this.characterX] = '^';
 				}else{
@@ -387,7 +400,12 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				this.map[this.characterY + 1][this.characterX] = '*';
+				//this.map[this.characterY + 1][this.characterX] = '*';
+				if(this.map[this.characterY + 1][this.characterX] == '@'){
+					this.map[this.characterY + 1][this.characterX] = '$';
+				}else{
+					this.map[this.characterY + 1][this.characterX] = '*';
+				}
 				if(this.map[this.characterY][this.characterX] == '$'){
 					this.map[this.characterY][this.characterX] = '^';
 				}else{
@@ -404,7 +422,12 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				this.map[this.characterY][this.characterX - 1] = '*';
+				//this.map[this.characterY][this.characterX - 1] = '*';
+				if(this.map[this.characterY][this.characterX - 1] == '@'){
+					this.map[this.characterY][this.characterX - 1] = '$';
+				}else{
+					this.map[this.characterY][this.characterX - 1] = '*';
+				}
 				if(this.map[this.characterY][this.characterX] == '$'){
 					this.map[this.characterY][this.characterX] = '^';
 				}else{
@@ -421,7 +444,12 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				this.map[this.characterY][this.characterX + 1] = '*';
+				//this.map[this.characterY][this.characterX + 1] = '*';
+				if(this.map[this.characterY][this.characterX + 1] == '@'){
+					this.map[this.characterY][this.characterX + 1] = '$';
+				}else{
+					this.map[this.characterY][this.characterX + 1] = '*';
+				}
 				if(this.map[this.characterY][this.characterX] == '$'){
 					this.map[this.characterY][this.characterX] = '^';
 				}else{
