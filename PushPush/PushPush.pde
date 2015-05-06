@@ -137,6 +137,7 @@ class PushPushGame {
 	public boolean isNewBest = false;
 	public boolean displayFinished = false;
 	public boolean needsViewUpdate = true;
+	public boolean needsScoreUpdate = true;
 
 	final String pathForStage (String name) {
 		return stageDirectory + name + ".stage";
@@ -357,6 +358,7 @@ class PushPushGame {
 
 	public void increaseMove () {
 		this.moveCount++;
+		this.needsScoreUpdate = true;
 	}
 
 	public void stageCleared () {
@@ -486,7 +488,7 @@ class PushPushGame {
 
 HCPixmap characterMap, backgroundMap, brickMap, crystalMap, houseMap, redhouseMap;
 PushPushGame currentGame;
-final int kNumberOfStages = 2;
+final int kNumberOfStages = 3;
 int currentStageNumber = 1;
 
 void setup () {
@@ -521,37 +523,40 @@ void drawBasedOnStateMap () {
 }
 
 void drawScore () {
-	if(currentGame.displayFinished){
-		clear();
-		background(0);
-		textSize(12 * viewScale);
-		textAlign(CENTER);
-		fill(255);
-		text("STAGE" + currentGame.name, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 24 * viewScale);
-		text("FINISHED!", blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 13 * viewScale);
-		textSize(9 * viewScale);
-		text("MOVES : " + currentGame.moveCount, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 10 * viewScale);
-		String message;
-		if(currentGame.isNewBest){
-			message = "NEW BEST!";
+	if(currentGame.needsScoreUpdate){
+		if(currentGame.displayFinished){
+			clear();
+			background(0);
+			textSize(12 * viewScale);
+			textAlign(CENTER);
+			fill(255);
+			text("STAGE" + currentGame.name, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 24 * viewScale);
+			text("FINISHED!", blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 13 * viewScale);
+			textSize(9 * viewScale);
+			text("MOVES : " + currentGame.moveCount, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 10 * viewScale);
+			String message;
+			if(currentGame.isNewBest){
+				message = "NEW BEST!";
+			}else{
+				message = "BEST : " + currentGame.bestScore();
+			}
+			text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
+			textSize(10);
+			if(currentStageNumber == kNumberOfStages){
+				message = "YOU CLEARED ALL STAGES!";
+			}else{
+				message = "PRESS ANY KEY TO CONTINUE";
+			}
+			text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale - 4 * viewScale);
 		}else{
-			message = "BEST : " + currentGame.bestScore();
+			fill(0);
+			textSize(7 * viewScale);
+			textAlign(LEFT);
+			text("MOVES:" + currentGame.moveCount + "  BEST:" + currentGame.bestScore(), viewScale, 8 * viewScale);
+			textAlign(RIGHT);
+			text("STAGE " + currentGame.name, blockSize * viewSizeInBlocks * viewScale - viewScale, 8 * viewScale);
 		}
-		text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
-		textSize(10);
-		if(currentStageNumber == kNumberOfStages){
-			message = "YOU CLEARED ALL STAGES!";
-		}else{
-			message = "PRESS ANY KEY TO CONTINUE";
-		}
-		text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale - 4 * viewScale);
-	}else{
-		fill(0);
-		textSize(7 * viewScale);
-		textAlign(LEFT);
-		text("MOVES:" + currentGame.moveCount + "  BEST:" + currentGame.bestScore(), viewScale, 8 * viewScale);
-		textAlign(RIGHT);
-		text("STAGE " + currentGame.name, blockSize * viewSizeInBlocks * viewScale - viewScale, 8 * viewScale);
+		currentGame.needsScoreUpdate = false;
 	}
 }
 
