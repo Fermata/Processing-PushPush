@@ -20,3 +20,5 @@
 * `0` : 구슬
 
 집과 구슬의 갯수는 일치해야합니다.
+
+Thanks to SunYeop Lee.
