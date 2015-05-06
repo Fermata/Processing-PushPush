@@ -117,15 +117,25 @@ class HCPixmap {
 class PushPushGame {
 	public char[][] map = new char[viewSizeInBlocks][viewSizeInBlocks];
 	private static final String stageDirectory = "stage/";
+	private static final String recordDirectory = "records/";
 	public String name;
 	public String path;
 	public int characterX;
 	public int characterY;
+	public int moveCount = 0;
+	public int numberOfHouse = 0;
+	public int numberOfFinishedHouse = 0;
+	public boolean displayFinished = false;
 	public boolean needsViewUpdate = true;
 
 	final String pathForStage (String name) {
 		return stageDirectory + name + ".stage";
 	}
+
+	final String pathForRecord (String name) {
+		return recordDirectory + name + ".record";
+	}
+
 
 	public PushPushGame (String name) {
 		this.name = name;
@@ -143,6 +153,18 @@ class PushPushGame {
 			}
 		}
 		this.findCharacter();
+		this.fetchHouseCount();
+	}
+
+	public void fetchHouseCount () {
+		for(int top = 0; top < viewSizeInBlocks; top++){
+			for(int left = 0; left < viewSizeInBlocks; left++){
+				char itemIdAtPoint = this.map[top][left];
+				if(itemIdAtPoint == '^'){
+					this.numberOfHouse++;
+				}
+			}
+		}
 	}
 
 	public void findCharacter () {
@@ -171,6 +193,10 @@ class PushPushGame {
 				}
 				if(itemIdAtPoint == '^'){
 					houseMap.drawAtBlock(x + left, y + top);
+					continue;
+				}
+				if(itemIdAtPoint == '@'){
+					redhouseMap.drawAtBlock(x + left, y + top);
 					continue;
 				}
 				if(itemIdAtPoint == '0'){
@@ -213,7 +239,7 @@ class PushPushGame {
 		}
 		if(direction == RIGHT){
 			if(this.characterX == viewSizeInBlocks) return false;
-			if(this.itemIdAtPoint(this.characterX + 1, this.characterY - 1) != '+') return false;
+			if(this.itemIdAtPoint(this.characterX + 1, this.characterY) != '+') return false;
 			return true;
 		}
 		return false;
@@ -234,7 +260,7 @@ class PushPushGame {
 		}
 		if(direction == RIGHT){
 			if(this.characterX == viewSizeInBlocks) return false;
-			if(this.itemIdAtPoint(this.characterX + 1, this.characterY - 1) == '0') return true;
+			if(this.itemIdAtPoint(this.characterX + 1, this.characterY) == '0') return true;
 		}
 		return false;
 	}
@@ -259,40 +285,98 @@ class PushPushGame {
 		return false;
 	}
 
+	public boolean isCrystalOnPointHasHouseOnDirection (int x, int y, int direction) {
+		if(direction == UP){
+			if(y == 0) return false;
+			if(this.itemIdAtPoint(x, y - 1) == '^') return true;
+		}
+		if(direction == DOWN){
+			if(y == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(x, y + 1) == '^') return true;
+		}
+		if(direction == LEFT){
+			if(x == 0) return false;
+			if(this.itemIdAtPoint(x - 1, y) == '^') return true;
+		}
+		if(direction == RIGHT){
+			if(x == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(x + 1, y) == '^') return true;
+		}
+		return false;
+	}
+
+	public void finishHouse () {
+		this.numberOfFinishedHouse++;
+		this.increaseMove();
+		if(this.numberOfHouse == this.numberOfFinishedHouse){
+			this.stageCleared();
+		}
+	}
+
+	public void increaseMove () {
+		this.moveCount++;
+	}
+
+	public void stageCleared () {
+		displayFinished = true;
+	}
+
 	public void moveCharacher (int input) {
 		if(this.isCrystalOnDirection(input)){
 			if(input == UP){
-				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, UP)) return;
-				this.needsViewUpdate = true;
-				this.map[this.characterY - 2][this.characterX] = '0';
+				if(this.isCrystalOnPointHasHouseOnDirection(this.characterX, this.characterY - 1, UP)){
+					this.map[this.characterY - 2][this.characterX] = '@';
+					this.finishHouse();
+				}else if(this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, UP)){
+					this.map[this.characterY - 2][this.characterX] = '0';
+				}else{
+					return;
+				}
 				this.map[this.characterY - 1][this.characterX] = '*';
 				this.map[this.characterY][this.characterX] = '+';
 				this.characterY -= 1;
 			}
 			if(input == DOWN){
-				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, DOWN)) return;
-				this.needsViewUpdate = true;
-				this.map[this.characterY + 2][this.characterX] = '0';
+				if(this.isCrystalOnPointHasHouseOnDirection(this.characterX, this.characterY + 1, DOWN)){
+					this.map[this.characterY + 2][this.characterX] = '@';
+					this.finishHouse();
+				}else if(this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY + 1, DOWN)){
+					this.map[this.characterY + 2][this.characterX] = '0';
+				}else{
+					return;
+				}
 				this.map[this.characterY + 1][this.characterX] = '*';
 				this.map[this.characterY][this.characterX] = '+';
 				this.characterY += 1;
 			}
 			if(input == LEFT){
-				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, LEFT)) return;
-				this.needsViewUpdate = true;
-				this.map[this.characterY][this.characterX - 2] = '0';
+				if(this.isCrystalOnPointHasHouseOnDirection(this.characterX - 1, this.characterY, LEFT)){
+					this.map[this.characterY][this.characterX - 2] = '@';
+					this.finishHouse();
+				}else if(this.isCrystalOnPointMovableToDirection(this.characterX - 1, this.characterY, LEFT)){
+					this.map[this.characterY][this.characterX - 2] = '0';
+				}else{
+					return;
+				}
 				this.map[this.characterY][this.characterX - 1] = '*';
 				this.map[this.characterY][this.characterX] = '+';
 				this.characterX -= 1;
 			}
 			if(input == RIGHT){
-				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, RIGHT)) return;
-				this.needsViewUpdate = true;
-				this.map[this.characterY][this.characterX + 2] = '0';
+				if(this.isCrystalOnPointHasHouseOnDirection(this.characterX + 1, this.characterY, RIGHT)){
+					this.map[this.characterY][this.characterX + 2] = '@';
+					this.finishHouse();
+				}else if(this.isCrystalOnPointMovableToDirection(this.characterX + 1, this.characterY, RIGHT)){
+					this.map[this.characterY][this.characterX + 2] = '0';
+				}else{
+					return;
+				}
 				this.map[this.characterY][this.characterX + 1] = '*';
 				this.map[this.characterY][this.characterX] = '+';
 				this.characterX += 1;
 			}
+			this.needsViewUpdate = true;
+			this.increaseMove();
 			return;
 		}
 		if(!this.isCharacterMovableToDirection(input)) return;
@@ -303,6 +387,7 @@ class PushPushGame {
 		if(input == LEFT) this.characterX -= 1;
 		if(input == RIGHT) this.characterX += 1;
 		this.map[this.characterY][this.characterX] = '*';
+		this.increaseMove();
 	}
 }
 
@@ -340,8 +425,31 @@ void drawBasedOnStateMap () {
 	}
 }
 
+void drawScore () {
+	if(currentGame.displayFinished){
+		clear();
+		background(0);
+		textSize(12 * viewScale);
+		textAlign(CENTER);
+		fill(255);
+		text("STAGE" + currentGame.name, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 24 * viewScale);
+		text("FINISHED!", blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 - 13 * viewScale);
+		textSize(9 * viewScale);
+		text("MOVES : " + currentGame.moveCount, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 10 * viewScale);
+		text("BEST : " + 8, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
+	}else{
+		fill(0);
+		textSize(7 * viewScale);
+		textAlign(LEFT);
+		text("MOVES:" + currentGame.moveCount + "  BEST:8", viewScale, 8 * viewScale);
+		textAlign(RIGHT);
+		text("STAGE " + currentGame.name, blockSize * viewSizeInBlocks * viewScale - viewScale, 8 * viewScale);
+	}
+}
+
 void draw () {
 	drawBasedOnStateMap();
+	drawScore();
 }
 
 void keyReleased () {
