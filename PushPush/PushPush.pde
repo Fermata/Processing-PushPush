@@ -93,7 +93,7 @@ class HCPixmap {
 		}
 	}
 
-	public void drawAtPoint(int x, int y) {
+	public void drawAtPoint (int x, int y) {
 		for(int top = 0; top < this.canvasHeight; top++){
 			for(int left = 0; left < this.canvasWidth; left++){
 				char colorIdAtPoint = this.canvas[top][left];
@@ -119,6 +119,8 @@ class PushPushGame {
 	private static final String stageDirectory = "stage/";
 	public String name;
 	public String path;
+	public int characterX;
+	public int characterY;
 	public boolean needsViewUpdate = true;
 
 	final String pathForStage (String name) {
@@ -131,13 +133,27 @@ class PushPushGame {
 		this.parse();
 	}
 
-	private void parse() {
+	private void parse () {
 		String[] content = loadStrings(this.path);
 		for(int index = 0; index < content.length; index++){
 			String line = content[index];
 			int lineLength = line.length();
 			for(int position = 0; position < lineLength; position++){
 				this.map[index][position] = line.charAt(position);
+			}
+		}
+		this.findCharacter();
+	}
+
+	public void findCharacter () {
+		for(int top = 0; top < viewSizeInBlocks; top++){
+			for(int left = 0; left < viewSizeInBlocks; left++){
+				char itemIdAtPoint = this.map[top][left];
+				if(itemIdAtPoint == '*'){
+					this.characterX = left;
+					this.characterY = top;
+					return;
+				}
 			}
 		}
 	}
@@ -169,6 +185,125 @@ class PushPushGame {
 		}
 		this.needsViewUpdate = false;
 	}
+
+	public char itemIdAtPoint (int x, int y) {
+		return this.map[y][x];
+	}
+
+	public boolean isItemMovableAtPoint (int x, int y) {
+		char itemIdAtPoint = this.itemIdAtPoint(x, y);
+		return (itemIdAtPoint == '0');
+	}
+
+	public boolean isCharacterMovableToDirection (int direction) {
+		if(direction == UP){
+			if(this.characterY == 0) return false;
+			if(this.itemIdAtPoint(this.characterX, this.characterY - 1) != '+') return false;
+			return true;
+		}
+		if(direction == DOWN){
+			if(this.characterY == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(this.characterX, this.characterY + 1) != '+') return false;
+			return true;
+		}
+		if(direction == LEFT){
+			if(this.characterX == 0) return false;
+			if(this.itemIdAtPoint(this.characterX - 1, this.characterY) != '+') return false;
+			return true;
+		}
+		if(direction == RIGHT){
+			if(this.characterX == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(this.characterX + 1, this.characterY - 1) != '+') return false;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isCrystalOnDirection (int direction) {
+		if(direction == UP){
+			if(this.characterY == 0) return false;
+			if(this.itemIdAtPoint(this.characterX, this.characterY - 1) == '0') return true;
+		}
+		if(direction == DOWN){
+			if(this.characterY == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(this.characterX, this.characterY + 1) == '0') return true;
+		}
+		if(direction == LEFT){
+			if(this.characterX == 0) return false;
+			if(this.itemIdAtPoint(this.characterX - 1, this.characterY) == '0') return true;
+		}
+		if(direction == RIGHT){
+			if(this.characterX == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(this.characterX + 1, this.characterY - 1) == '0') return true;
+		}
+		return false;
+	}
+
+	public boolean isCrystalOnPointMovableToDirection (int x, int y, int direction) {
+		if(direction == UP){
+			if(y == 0) return false;
+			if(this.itemIdAtPoint(x, y - 1) == '+') return true;
+		}
+		if(direction == DOWN){
+			if(y == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(x, y + 1) == '+') return true;
+		}
+		if(direction == LEFT){
+			if(x == 0) return false;
+			if(this.itemIdAtPoint(x - 1, y) == '+') return true;
+		}
+		if(direction == RIGHT){
+			if(x == viewSizeInBlocks) return false;
+			if(this.itemIdAtPoint(x + 1, y) == '+') return true;
+		}
+		return false;
+	}
+
+	public void moveCharacher (int input) {
+		if(this.isCrystalOnDirection(input)){
+			if(input == UP){
+				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, UP)) return;
+				this.needsViewUpdate = true;
+				this.map[this.characterY - 2][this.characterX] = '0';
+				this.map[this.characterY - 1][this.characterX] = '*';
+				this.map[this.characterY][this.characterX] = '+';
+				this.characterY -= 1;
+			}
+			if(input == DOWN){
+				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, DOWN)) return;
+				this.needsViewUpdate = true;
+				this.map[this.characterY + 2][this.characterX] = '0';
+				this.map[this.characterY + 1][this.characterX] = '*';
+				this.map[this.characterY][this.characterX] = '+';
+				this.characterY += 1;
+			}
+			if(input == LEFT){
+				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, LEFT)) return;
+				this.needsViewUpdate = true;
+				this.map[this.characterY][this.characterX - 2] = '0';
+				this.map[this.characterY][this.characterX - 1] = '*';
+				this.map[this.characterY][this.characterX] = '+';
+				this.characterX -= 1;
+			}
+			if(input == RIGHT){
+				if(!this.isCrystalOnPointMovableToDirection(this.characterX, this.characterY - 1, RIGHT)) return;
+				this.needsViewUpdate = true;
+				this.map[this.characterY][this.characterX + 2] = '0';
+				this.map[this.characterY][this.characterX + 1] = '*';
+				this.map[this.characterY][this.characterX] = '+';
+				this.characterX += 1;
+			}
+			return;
+		}
+		if(!this.isCharacterMovableToDirection(input)) return;
+		this.needsViewUpdate = true;
+		this.map[this.characterY][this.characterX] = '+';
+		if(input == UP) this.characterY -= 1;
+		if(input == DOWN) this.characterY += 1;
+		if(input == LEFT) this.characterX -= 1;
+		if(input == RIGHT) this.characterX += 1;
+		this.map[this.characterY][this.characterX] = '*';
+	}
 }
 
 HCPixmap characterMap, backgroundMap, brickMap, crystalMap, houseMap, redhouseMap;
@@ -197,7 +332,7 @@ void drawBackground(){
 	}
 }
 
-void drawBasedOnStateMap(){
+void drawBasedOnStateMap () {
 	if(currentGame.needsViewUpdate){
 		clear();
 		drawBackground();
@@ -205,6 +340,12 @@ void drawBasedOnStateMap(){
 	}
 }
 
-void draw(){
+void draw () {
 	drawBasedOnStateMap();
+}
+
+void keyReleased () {
+	if(keyCode == UP || keyCode == DOWN || keyCode == LEFT || keyCode == RIGHT){
+		currentGame.moveCharacher(keyCode);
+	}
 }
