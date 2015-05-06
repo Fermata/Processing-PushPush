@@ -1,6 +1,13 @@
-int blockSize = 14;
-int viewSizeInBlocks = 10;
-int viewScale = 2;
+/*
+	PushPush Game (Processing)
+	2015.05.05 이해찬
+	https://github.com/Fermata/Processing-PushPush
+	창의적 공학 설계 과제
+*/
+
+final int blockSize = 14;
+final int viewSizeInBlocks = 10;
+final int viewScale = 2;
 
 class HCColor {
 	public int red;
@@ -378,7 +385,6 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				//this.map[this.characterY - 1][this.characterX] = '*';
 				if(this.map[this.characterY - 1][this.characterX] == '@'){
 					this.map[this.characterY - 1][this.characterX] = '$';
 				}else{
@@ -400,7 +406,6 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				//this.map[this.characterY + 1][this.characterX] = '*';
 				if(this.map[this.characterY + 1][this.characterX] == '@'){
 					this.map[this.characterY + 1][this.characterX] = '$';
 				}else{
@@ -422,7 +427,6 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				//this.map[this.characterY][this.characterX - 1] = '*';
 				if(this.map[this.characterY][this.characterX - 1] == '@'){
 					this.map[this.characterY][this.characterX - 1] = '$';
 				}else{
@@ -444,7 +448,6 @@ class PushPushGame {
 				}else{
 					return;
 				}
-				//this.map[this.characterY][this.characterX + 1] = '*';
 				if(this.map[this.characterY][this.characterX + 1] == '@'){
 					this.map[this.characterY][this.characterX + 1] = '$';
 				}else{
