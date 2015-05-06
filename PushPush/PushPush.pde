@@ -422,6 +422,8 @@ class PushPushGame {
 
 HCPixmap characterMap, backgroundMap, brickMap, crystalMap, houseMap, redhouseMap;
 PushPushGame currentGame;
+final int kNumberOfStages = 1;
+int currentStageNumber = 1;
 
 void setup () {
 	size(blockSize * viewSizeInBlocks * viewScale, blockSize * viewSizeInBlocks * viewScale);
@@ -472,6 +474,8 @@ void drawScore () {
 			message = "BEST : " + currentGame.bestScore();
 		}
 		text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
+		textSize(message);
+		text(message, blockSize * viewSizeInBlocks * viewScale / 2, blockSize * viewSizeInBlocks * viewScale / 2 + 20 * viewScale);
 	}else{
 		fill(0);
 		textSize(7 * viewScale);
@@ -490,5 +494,12 @@ void draw () {
 void keyReleased () {
 	if(keyCode == UP || keyCode == DOWN || keyCode == LEFT || keyCode == RIGHT){
 		currentGame.moveCharacher(keyCode);
+	}
+	if(currentGame.displayFinished){
+		if(currentStageNumber == kNumberOfStages){
+			exit(0);
+		}else{
+			currentGame = new PushPushGame("" + (currentStageNumber + 1));
+		}
 	}
 }
