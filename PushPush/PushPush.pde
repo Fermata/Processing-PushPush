@@ -214,6 +214,11 @@ class PushPushGame {
 					houseMap.drawAtBlock(x + left, y + top);
 					continue;
 				}
+				if(itemIdAtPoint == '$'){
+					houseMap.drawAtBlock(x + left, y + top);
+					characterMap.drawAtBlock(x + left, y + top);
+					continue;
+				}
 				if(itemIdAtPoint == '@'){
 					redhouseMap.drawAtBlock(x + left, y + top);
 					continue;
@@ -243,23 +248,23 @@ class PushPushGame {
 	public boolean isCharacterMovableToDirection (int direction) {
 		if(direction == UP){
 			if(this.characterY == 0) return false;
-			if(this.itemIdAtPoint(this.characterX, this.characterY - 1) != '+') return false;
-			return true;
+			char itemId = this.itemIdAtPoint(this.characterX, this.characterY - 1);
+			if(itemId == '+' || itemId == '^') return true;
 		}
 		if(direction == DOWN){
 			if(this.characterY == viewSizeInBlocks) return false;
-			if(this.itemIdAtPoint(this.characterX, this.characterY + 1) != '+') return false;
-			return true;
+			char itemId = this.itemIdAtPoint(this.characterX, this.characterY + 1);
+			if(itemId == '+' || itemId == '^') return true;
 		}
 		if(direction == LEFT){
 			if(this.characterX == 0) return false;
-			if(this.itemIdAtPoint(this.characterX - 1, this.characterY) != '+') return false;
-			return true;
+			char itemId = this.itemIdAtPoint(this.characterX - 1, this.characterY);
+			if(itemId == '+' || itemId == '^') return true;
 		}
 		if(direction == RIGHT){
 			if(this.characterX == viewSizeInBlocks) return false;
-			if(this.itemIdAtPoint(this.characterX + 1, this.characterY) != '+') return false;
-			return true;
+			char itemId = this.itemIdAtPoint(this.characterX + 1, this.characterY);
+			if(itemId == '+' || itemId == '^') return true;
 		}
 		return false;
 	}
@@ -267,19 +272,23 @@ class PushPushGame {
 	public boolean isCrystalOnDirection (int direction) {
 		if(direction == UP){
 			if(this.characterY == 0) return false;
-			if(this.itemIdAtPoint(this.characterX, this.characterY - 1) == '0') return true;
+			char itemId = this.itemIdAtPoint(this.characterX, this.characterY - 1);
+			if(itemId == '0' || itemId == '@') return true;
 		}
 		if(direction == DOWN){
 			if(this.characterY == viewSizeInBlocks) return false;
-			if(this.itemIdAtPoint(this.characterX, this.characterY + 1) == '0') return true;
+			char itemId = this.itemIdAtPoint(this.characterX, this.characterY + 1);
+			if(itemId == '0' || itemId == '@') return true;
 		}
 		if(direction == LEFT){
 			if(this.characterX == 0) return false;
-			if(this.itemIdAtPoint(this.characterX - 1, this.characterY) == '0') return true;
+			char itemId = this.itemIdAtPoint(this.characterX - 1, this.characterY);
+			if(itemId == '0' || itemId == '@') return true;
 		}
 		if(direction == RIGHT){
 			if(this.characterX == viewSizeInBlocks) return false;
-			if(this.itemIdAtPoint(this.characterX + 1, this.characterY) == '0') return true;
+			char itemId = this.itemIdAtPoint(this.characterX + 1, this.characterY);
+			if(itemId == '0' || itemId == '@') return true;
 		}
 		return false;
 	}
@@ -362,7 +371,11 @@ class PushPushGame {
 					return;
 				}
 				this.map[this.characterY - 1][this.characterX] = '*';
-				this.map[this.characterY][this.characterX] = '+';
+				if(this.map[this.characterY][this.characterX] == '$'){
+					this.map[this.characterY][this.characterX] = '^';
+				}else{
+					this.map[this.characterY][this.characterX] = '+';
+				}
 				this.characterY -= 1;
 			}
 			if(input == DOWN){
@@ -375,7 +388,11 @@ class PushPushGame {
 					return;
 				}
 				this.map[this.characterY + 1][this.characterX] = '*';
-				this.map[this.characterY][this.characterX] = '+';
+				if(this.map[this.characterY][this.characterX] == '$'){
+					this.map[this.characterY][this.characterX] = '^';
+				}else{
+					this.map[this.characterY][this.characterX] = '+';
+				}
 				this.characterY += 1;
 			}
 			if(input == LEFT){
@@ -388,7 +405,11 @@ class PushPushGame {
 					return;
 				}
 				this.map[this.characterY][this.characterX - 1] = '*';
-				this.map[this.characterY][this.characterX] = '+';
+				if(this.map[this.characterY][this.characterX] == '$'){
+					this.map[this.characterY][this.characterX] = '^';
+				}else{
+					this.map[this.characterY][this.characterX] = '+';
+				}
 				this.characterX -= 1;
 			}
 			if(input == RIGHT){
@@ -401,7 +422,11 @@ class PushPushGame {
 					return;
 				}
 				this.map[this.characterY][this.characterX + 1] = '*';
-				this.map[this.characterY][this.characterX] = '+';
+				if(this.map[this.characterY][this.characterX] == '$'){
+					this.map[this.characterY][this.characterX] = '^';
+				}else{
+					this.map[this.characterY][this.characterX] = '+';
+				}
 				this.characterX += 1;
 			}
 			this.needsViewUpdate = true;
@@ -410,12 +435,20 @@ class PushPushGame {
 		}
 		if(!this.isCharacterMovableToDirection(input)) return;
 		this.needsViewUpdate = true;
-		this.map[this.characterY][this.characterX] = '+';
+		if(this.map[this.characterY][this.characterX] == '$'){
+			this.map[this.characterY][this.characterX] = '^';
+		}else{
+			this.map[this.characterY][this.characterX] = '+';
+		}
 		if(input == UP) this.characterY -= 1;
 		if(input == DOWN) this.characterY += 1;
 		if(input == LEFT) this.characterX -= 1;
 		if(input == RIGHT) this.characterX += 1;
-		this.map[this.characterY][this.characterX] = '*';
+		if(this.map[this.characterY][this.characterX] == '^'){
+			this.map[this.characterY][this.characterX] = '$';
+		}else{
+			this.map[this.characterY][this.characterX] = '*';
+		}
 		this.increaseMove();
 	}
 }
@@ -506,5 +539,7 @@ void keyReleased () {
 	if(keyCode == UP || keyCode == DOWN || keyCode == LEFT || keyCode == RIGHT){
 		currentGame.moveCharacher(keyCode);
 		return;
+	}else if(key == 'r'){
+		currentGame = new PushPushGame("" + currentStageNumber);
 	}
 }
